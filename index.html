@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Affiliate Store</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 40px;
+            font-size: 32px;
+        }
+
+        .products {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .product {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .product:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        /* --- स्लाइडर CSS --- */
+        .product-image-slider {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            width: 100%;
+            height: 280px; 
+            background-color: #ffffff; 
+            scrollbar-width: none; 
+            -ms-overflow-style: none; 
+        }
+        
+        .product-image-slider::-webkit-scrollbar {
+            display: none; 
+        }
+
+        .slide {
+            min-width: 100%; 
+            height: 100%;
+            scroll-snap-align: start; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; 
+            cursor: pointer; 
+        }
+
+        /* --- फुल-स्क्रीन इमेज व्यूअर (Lightbox) CSS --- */
+        .image-modal {
+            display: none; 
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9); 
+            align-items: center;
+            justify-content: center;
+            overflow: auto; 
+        }
+
+        .image-modal img {
+            max-width: 95%;
+            max-height: 95%;
+            object-fit: contain;
+        }
+
+        .close-modal-btn {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 10000;
+            user-select: none;
+        }
+
+        .close-modal-btn:hover,
+        .close-modal-btn:focus {
+            color: #bbb;
+        }
+
+        .product-content {
+            padding: 15px;
+        }
+
+        .product-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .product-caption {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        /* --- बटन की डिज़ाइन --- */
+        .product-link {
+            display: inline-block;
+            background-color: #0066cc;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            width: 100%;
+            text-align: center;
+            transition: background-color 0.3s, opacity 0.3s;
+        }
+
+        .product-link:hover {
+            background-color: #0052a3;
+        }
+        
+        /* जब बटन लोडिंग मोड में हो */
+        .product-link.loading-state {
+            background-color: #555555;
+            cursor: wait;
+            opacity: 0.8;
+        }
+
+        .swipe-hint {
+            text-align: center;
+            font-size: 11px;
+            color: #999;
+            padding: 5px 0 0 0;
+            margin-bottom: -5px;
+        }
+
+        @media (max-width: 600px) {
+            .products {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1> SWORD VERSE 
+        </h1>
+        
+        <div class="products" id="productsContainer">
+            </div>
+    </div>
+
+    <div id="myImageModal" class="image-modal">
+        <span class="close-modal-btn" onclick="closeModalFromUI()">&times;</span>
+        <img id="fullScreenImg" src="">
+    </div>
+
+    <script>
+        const products = [
+            {
+                name: "SOLO LEVELING",
+                caption: "SOLO LEVELING OVERSIZED T SHIRTS",
+                images: [
+                    "solo2.jpg",
+                    "solo1.jpg",
+                    "solo3.jpg"
+                ],
+                link: "https://www.myntra.com/Tshirts/WHITE+HUSK/WHITE-HUSK-Beru-Arise-Solo-Leveling-Anime-Printed-Cotton-Oversized-Tshirt/36672979/buy?storeContext=fwd&utm_source=ugc_affiliate_meta&utm_medium=fb_affiliate&utm_campaign=y8EgXH04kshpfzCn&affiliate_id=y8EgXH04kshpfzCn"
+            },
+            {
+                name: "DEMON SLAYER",
+                caption: "Demon Slayer Double Sided Woven Anime Metal Key chain",
+                images: [
+                    "demon1.jpg",
+                    "demon2.jpg"
+                ],
+                link: "http://www.myntra.com/Key-chain/COMICSENSE/COMICSENSE-Demon-Slayer-Double-Sided-Woven-Anime-Metal-Key-chain/31455690/buy?utm_source=ugc_affiliate_meta&utm_medium=fb_affiliate&utm_campaign=y8EgXH04kshpfzCn&affiliate_id=y8EgXH04kshpfzCn"
+            },
+            {
+                name: "NARUTO",
+                caption: "Ourrble Kakashi Hatake Anime Key Chains For Naruto Fans, For Gifting, Bike, Scooty,...",
+                images: [
+                    "kakashi.jpg",
+                    "kakashi1.png",
+                    "kakashi2.png"
+                ],
+                link: "http://www.flipkart.com/ourrble-kakashi-hatake-anime-key-chains-naruto-fans-gifting-bike-scooty-car-chain/p/itmbf29a43d25fab?pid=KECHFQHKUU6ZMSS6&marketplace=FLIPKART&cmpid=content_appretar_Stationery&affid=inf_90a1129d-f7d6-495d-8cf8-8ad68b695a15"
+            },
+            {
+                name: "GOJO",
+                caption: "ADRO Men Graphic Anime Printed Round Neck Cotton Oversized T-Shirt",
+                images: [
+                    "gojo2.jpg",
+                    "gojo1.jpg",
+                    "gojo3.jpg"
+                ],
+                link: "https://www.example.com"
+            }
+        ];
+
+        // Display products
+        const container = document.getElementById('productsContainer');
+        
+        products.forEach(product => {
+            let imagesHTML = '';
+            product.images.forEach(imgUrl => {
+                imagesHTML += `
+                    <div class="slide">
+                        <img src="${imgUrl}" alt="${product.name}" onclick="openModal('${imgUrl}')">
+                    </div>
+                `;
+            });
+
+            let swipeHintHTML = product.images.length > 1 ? `<div class="swipe-hint">Swipe to see more ➔</div>` : '';
+
+            const productHTML = `
+                <div class="product">
+                    <div class="product-image-slider">
+                        ${imagesHTML}
+                    </div>
+                    <div class="product-content">
+                        ${swipeHintHTML}
+                        <div class="product-name" style="margin-top: 10px;">${product.name}</div>
+                        <div class="product-caption">${product.caption}</div>
+                        <a href="${product.link}" target="_blank" class="product-link" onclick="showLoading(this)">Buy Now</a>
+                    </div>
+                </div>
+            `;
+            container.innerHTML += productHTML;
+        });
+
+        // --- बटन लोडिंग एनीमेशन लॉजिक ---
+        function showLoading(button) {
+            const originalText = button.innerHTML;
+            button.classList.add("loading-state");
+            button.innerHTML = "Redirecting... ⏳";
+            
+            setTimeout(() => {
+                button.classList.remove("loading-state");
+                button.innerHTML = originalText;
+            }, 3000);
+        }
+
+        // --- फुल-स्क्रीन (Lightbox) और बैक जेस्चर का लॉजिक ---
+        const modal = document.getElementById('myImageModal');
+        const fullImg = document.getElementById('fullScreenImg');
+        let isModalOpen = false;
+
+        function openModal(imgSrc) {
+            fullImg.src = imgSrc;
+            modal.style.display = "flex";
+            isModalOpen = true;
+            history.pushState({ modalOpen: true }, "", "#imageview");
+        }
+
+        function closeModalFromUI() {
+            if (isModalOpen) {
+                history.back(); 
+            }
+        }
+
+        window.addEventListener('popstate', function(event) {
+            if (isModalOpen) {
+                modal.style.display = "none";
+                fullImg.src = "";
+                isModalOpen = false;
+            }
+        });
+    </script>
+</body>
+</html>
